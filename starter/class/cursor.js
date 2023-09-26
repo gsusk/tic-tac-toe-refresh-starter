@@ -32,7 +32,7 @@ class Cursor {
     Screen.render()
   }
 
-  down() {
+  down = () => {
     this.resetBackgroundColor();
 
     if (this.row !== this.numRows - 1) {
@@ -61,10 +61,18 @@ class Cursor {
       this.col++;
     }
 
-    this.setBackgroundColor
+    this.setBackgroundColor()
     Screen.render()
   }
 
+  setMove = () => {
+    Screen.setTextColor(this.cursor.row, this.cursor.col, "white");
+    Screen.setGrid(this.cursor.row, this.cursor.col, this.playerTurn);
+    if (TTT.checkWin(Screen.grid)) {
+      TTT.endGame(TTT.checkWin(Screen.grid));
+    };
+    Screen.render();
+  }
 }
 
 

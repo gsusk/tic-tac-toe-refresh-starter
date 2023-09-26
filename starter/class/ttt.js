@@ -18,8 +18,11 @@ class TTT {
     Screen.setGridlines(true);
 
     // Replace this with real commands
-    Screen.addCommand('t', 'test command (remove)', TTT.testCommand);
-
+    Screen.addCommand('up', 'moves cursor up', this.cursor.up);
+    Screen.addCommand('down', 'moves cursor down', this.cursor.down);
+    Screen.addCommand('left', 'moves cursor left', this.cursor.left);
+    Screen.addCommand('right', 'moves cursor right', this.cursor.right);
+    Screen.addCommand('return', "do a move in the cursors position", this.setMove)
     Screen.render();
   }
 
@@ -28,18 +31,51 @@ class TTT {
     console.log("TEST COMMAND");
   }
 
+  setPlayerTurn(turn) {
+    this.playerTurn = turn;
+    Screen.setMessage(`Player ${this.playerTurn}'s move.`);
+  }
+
+  static placeMove() {
+    // What is bind doing exactly in addCommand above?
+    Screen.render();
+    // Why couldn't I  do below this.grid
+    if (Screen.grid[this.cursor.row][this.cursor.col] === " ") {
+      this.cursor.return(this.playerTurn);
+      if (this.playerTurn === "O") {
+        this.playerTurn = "X";
+      } else {
+        this.playerTurn = "O";
+      }
+
+      Screen.render();
+      let winner = TTT.checkWin(Screen.grid);
+      if (winner) {
+        TTT.endGame(winner);
+      }
+    } else {
+      Screen.setMessage(
+        "That space is already occupied. Choose another space."
+      );
+      Screen.render();
+    }
+  }
+
   static checkWin(grid) {
     // Return 'X' if player X wins
     // Return 'O' if player O wins
 
     // Return false if the game has not ended
-    if (grid.every((rw) => rw.every((clmn) => clmn === ' '))) {
+    const emptyGrid = grid.every((row) => row.every((space) => space === " "));
+    const fullGrid = grid.every((row) => row.every((space) => space !== " "));
+
+    if (emptyGrid) {
+      // Return false if the game has not ended
       return false;
     }
-
-    // Return 'T' if the game is a tie
-    if (grid.every(rw => rw.every((clmn) => clmn !== ' '))) {
-      return 'T'
+    if (fullGrid) {
+      //tie game
+      return "T";
     }
 
     //horizontal win:
@@ -84,11 +120,11 @@ class TTT {
         }
       }
     }
-    if (leftDiagonal.every((val) => val === leftDiagonal[0])) {
+    if (leftDiagonal.every((val) => val === leftDiagonal[0] && leftDiagonal[0] !== ' ')) {
       return leftDiagonal[0];
     }
 
-    if (rightDiagonal.every((val) => val === rightDiagonal[0])) {
+    if (rightDiagonal.every((val) => val === rightDiagonal[0] && rightDiagonal[0] !== ' ')) {
       return rightDiagonal[0];
     }
     return false;
@@ -106,6 +142,19 @@ class TTT {
     Screen.quit();
   }
 
+  setMove = () => {
+    Screen.setTextColor(this.cursor.row, this.cursor.col, "cyan");
+    Screen.setGrid(this.cursor.row, this.cursor.col, this.playerTurn);
+    if (TTT.checkWin(Screen.grid)) {
+      TTT.endGame(TTT.checkWin(Screen.grid));
+    };
+    if (this.playerTurn === 'O') {
+      this.playerTurn = 'X';
+    } else {
+      this.playerTurn = 'O'
+    }
+    Screen.render();
+  }
 }
 
 module.exports = TTT;
